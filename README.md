@@ -138,10 +138,13 @@ Trained and evaluated 3 distinct model architectures with stratified 80/20 train
 ## 9. How to Run
 
 ```bash
-# Run the cleaning pipeline
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Run the cleaning pipeline
 python src/clean.py
 
-# Rebuild and execute the notebooks
+# 3. Rebuild and execute the notebooks
 python scripts/build_notebook.py
 python scripts/build_eda_notebook.py
 python scripts/build_model_notebook.py
