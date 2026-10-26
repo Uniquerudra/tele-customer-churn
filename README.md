@@ -1,8 +1,10 @@
 # 📊 Telco Customer Churn Analysis & Prediction
 
-An end-to-end churn project on the IBM Telco Customer Churn dataset: a Python data-cleaning pipeline, a Power BI dashboard for business insights, and a planned machine learning model to predict which customers are likely to leave.
+An end-to-end churn project on the IBM Telco Customer Churn dataset: a Python data-cleaning pipeline, an executive Power BI dashboard for business insights, and trained machine learning models to predict customer attrition.
 
-![Power BI Dashboard](powerbi/dashboard.png)
+[![Power BI Dashboard Preview](reports/dashboard_preview.png)](reports/telecom_churn_powerbi_dashboard.pdf)
+
+👉 **[📄 Click here to Download / View Full Power BI Report (PDF)](reports/telecom_churn_powerbi_dashboard.pdf)**
 
 ---
 
@@ -17,7 +19,10 @@ An end-to-end churn project on the IBM Telco Customer Churn dataset: a Python da
 
 ## 2. Tech Stack
 
-Python (pandas, Jupyter), SQLite, Power BI (DAX, Power Query), scikit-learn, XGBoost, imbalanced-learn, SHAP.
+- **Data Processing & Analytics:** Python (pandas, numpy, Jupyter, SQLite)
+- **Business Intelligence:** Power BI (DAX, Power Query, Data Modeling)
+- **Machine Learning:** scikit-learn (Logistic Regression, Random Forest, Gradient Boosting)
+- **Visualization:** Matplotlib, Seaborn
 
 ---
 
@@ -30,17 +35,21 @@ telco-customer-churn/
 │   ├── telco_churn_cleaned.csv                # Cleaned & feature-engineered dataset (7,043 x 24)
 │   ├── clean.csv                              # Copy of the cleaned data
 │   └── churn.db                               # SQLite database export
-├── src/
-│   └── clean.py                               # Cleaning & feature engineering pipeline
-├── scripts/
-│   └── build_notebook.py                      # Builds and executes the Jupyter notebooks
+├── reports/
+│   ├── dashboard_preview.png                  # Dashboard visual preview
+│   └── telecom_churn_powerbi_dashboard.pdf    # Full Power BI executive report (PDF)
+├── models/
+│   └── churn_model_pipeline.joblib            # Serialized winning ML model & preprocessor
 ├── notebooks/
 │   ├── 01_cleaning.ipynb                      # [DONE] Cleaning, validation, initial checks
-│   ├── 02_eda.ipynb                           # [DONE] Exploratory data analysis
-│   └── 03_model.ipynb                         # [DONE] Modeling & evaluation
-├── powerbi/
-│   ├── Telco_Churn_Dashboard.pbix             # [DONE] Interactive dashboard
-│   └── dashboard.png                          # Dashboard screenshot
+│   ├── 02_eda.ipynb                           # [DONE] Exploratory data analysis & financial impact
+│   └── 03_model.ipynb                         # [DONE] Machine learning modeling & evaluation
+├── src/
+│   └── clean.py                               # Reusable cleaning & feature engineering pipeline
+├── scripts/
+│   ├── build_notebook.py                      # Builds and executes cleaning notebook
+│   ├── build_eda_notebook.py                  # Builds and executes EDA notebook
+│   └── build_model_notebook.py                # Builds and executes ML notebook
 └── README.md
 ```
 
@@ -74,67 +83,72 @@ telco-customer-churn/
 
 An interactive dashboard built on the Telco data.
 
-**KPI cards:** Churn Rate, Total Customers, Revenue at Risk.
+- **KPI cards:** Churn Rate, Total Customers, Revenue at Risk.
+- **Visuals:** Churn Rate by Contract, Churn Rate by Tenure Group, Churned Customers by Payment Method, and a Stayed vs Churned donut chart.
+- **Slicers:** gender, InternetService, SeniorCitizen. Every card and chart updates when a slicer is used.
 
-**Visuals:** Churn Rate by Contract, Churn Rate by Tenure Group, Churned Customers by Payment Method, and a Stayed vs Churned donut chart.
-
-**Slicers:** gender, InternetService, SeniorCitizen. Every card and chart updates when a slicer is used.
-
-**DAX measures**
+**DAX measures:**
 - `Churn Rate`: share of customers who churned.
 - `Total Customers`: count of customers.
 - `Churned Customers`: count of customers with Churn Label = Churned.
-- `Revenue at Risk`: sum of `MonthlyCharges` for churned customers.
+- `Revenue at Risk`: sum of `MonthlyCharges` for churned customers ($139.1K).
 
 > **Note:** The Power BI model has 7,032 customers because the 11 rows with blank `TotalCharges` were excluded there. The Python pipeline keeps all 7,043 rows (filled with 0.0). The churn rate is about 26.5% in both. Tenure groups also differ: the dashboard uses 3 groups (0-12, 13-36, 37+ months), the Python pipeline uses 5 bins.
 
 ---
 
-## 6. Key Findings
+## 6. Key Business Findings
 
 | Finding | Evidence |
 |---|---|
-| Overall churn is about 26.6%, with about **$139K monthly revenue at risk** | Dashboard KPI cards |
-| **Month-to-month** contracts churn the most; two-year contracts churn the least | Churn Rate by Contract |
+| Overall churn is about 26.6%, with about **$139K monthly revenue at risk** | Dashboard KPI cards & EDA |
+| **Month-to-month** contracts churn the most (~42.7%); two-year contracts churn the least (~2.8%) | Churn Rate by Contract |
 | **New customers (0-12 months)** churn the most, about 47%. Churn falls to about 6.6% after 60+ months | Tenure cohorts |
-| **Electronic check** users make up the largest group of churned customers | Churned Customers by Payment Method |
+| **Electronic check** users make up the largest group of churned customers (~45.3% churn rate) | Churned Customers by Payment Method |
 | **Fiber optic** customers churn at about 41.9%, well above average | InternetService slicer |
 | Customers with **0 add-on services** churn at about 43%; with 4+ add-ons, under 15% | `TotalAddonServices` |
 
-**Suggested actions:** push new customers toward longer contracts, bundle add-on services to increase stickiness, and encourage a move from electronic check to automatic payments.
+---
+
+## 7. Machine Learning Model Benchmarks (`03_model.ipynb`)
+
+Trained and evaluated 3 distinct model architectures with stratified 80/20 train-test split:
+
+| Model Architecture | Accuracy | Precision | Recall (Churn) | F1-Score | ROC-AUC Score |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **Logistic Regression (Balanced)** | 73.4% | 49.9% | **79.4%** | 0.613 | **0.842** |
+| **Random Forest (Balanced)** | 75.9% | 53.1% | 78.6% | **0.634** | **0.842** |
+| **Gradient Boosting** | **80.3%** | **66.2%** | 52.4% | 0.585 | 0.841 |
+
+> **Key Modeling Takeaway**: 
+> - **Logistic Regression (Class-Weighted)** achieved the highest churn **Recall (79.4%)** and top **ROC-AUC (0.842)**. In customer retention, Recall on the churn class is the priority metric, since missing a customer who is about to leave costs significantly more than a false alarm.
+> - **Gradient Boosting** provided the highest overall accuracy (**80.3%**) and precision (**66.2%**).
+> - Winning model pipeline serialized and saved to `models/churn_model_pipeline.joblib`.
 
 ---
 
-## 7. Project Status & Roadmap
+## 8. Strategic Retention Recommendations
 
-| Phase | Component | Status | Details |
-|---|---|---|---|
-| 1 | Data cleaning & feature engineering | ✅ Done | `src/clean.py`, `01_cleaning.ipynb`, cleaned CSV |
-| 2 | Business dashboard (Power BI) | ✅ Done | KPIs, 4 charts, 3 slicers, DAX measures |
-| 3 | Exploratory analysis in Python | ✅ Done | `02_eda.ipynb`: churn vs Contract, PaymentMethod, InternetService and TenureGroup; correlation heatmap; MonthlyCharges and add-on analysis. Goal: confirm the dashboard insights in code |
-| 4 | Predictive modeling | ✅ Done | `03_model.ipynb`: stratified train/test split, encoding and scaling, class weights or SMOTE, Logistic Regression (baseline), Random Forest, XGBoost; evaluate with ROC-AUC, PR-AUC and **recall** on the churn class; feature importance with SHAP |
-
-Recall on the churn class is the priority metric, since missing a customer who is about to leave costs more than a false alarm.
+1. **Incentivize Annual Contracts**: 88% of churn comes from month-to-month contracts. Offer targeted $5-$10 bill credits at month 3 and 9 to convert customers to 1-year contracts.
+2. **Support Bundling for Fiber Optic**: Fiber Optic customers have high churn (41.9%) due to premium price without support. Bundle free 3-month TechSupport and OnlineSecurity.
+3. **Migrate Electronic Check Users**: Customers on Electronic Check churn at 45.3%. Provide a one-time account credit to switch to automatic payment (Credit Card / Bank Transfer).
 
 ---
 
-## 8. How to Run
+## 9. How to Run
 
 ```bash
-# Install dependencies
-pip install pandas jupyter
-
 # Run the cleaning pipeline
 python src/clean.py
 
-# Rebuild and execute the cleaning notebook
+# Rebuild and execute the notebooks
 python scripts/build_notebook.py
+python scripts/build_eda_notebook.py
+python scripts/build_model_notebook.py
 ```
-
-To explore the dashboard, open `powerbi/Telco_Churn_Dashboard.pbix` in Power BI Desktop.
 
 ---
 
-## 9. Author
+## 10. Author
 
 **Rudra Pratap Pal**
